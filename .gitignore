@@ -1,4 +1,6 @@
 others/papers
-data/faces
+data/
 .ipynb_cheсkpoints/
 other/init.txt
+faces/
+*__pycache__/
