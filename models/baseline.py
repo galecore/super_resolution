@@ -29,17 +29,18 @@ class UpConvBlock(torch.nn.Module): # with PixelShuffle
 
 
 class Baseline(torch.nn.Module):
-    def __init__(self, *sequence):
+    def __init__(self, device, *sequence):
         super(Baseline, self).__init__()
-        self.model = torch.nn.Sequential(*sequence)
-
+        self.model = torch.nn.Sequential(*sequence).to(device)
+        self.device = device
+        
     def forward(self, x):
-        x = self.model.forward(x)
+        x = self.model.forward(x.to(self.device))
         return x
 
     def predict(self, x):
         self.model.eval()
         with torch.no_grad():
-            x = self.model.forward(x)
+            x = self.model.forward(x.to(self.device))
         self.model.train()
-        return x
+        return x.detach().cpu()

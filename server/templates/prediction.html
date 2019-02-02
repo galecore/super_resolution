@@ -1,0 +1,28 @@
+<html>
+<title>Prediction</title>
+<head>
+    <style type="text/css">
+        figure {
+            display: inline-block;
+        }
+    </style>
+</head>
+  <body>
+  <center>
+    <h1>Prediction</h1>
+<figure>
+  <img src="{{url_for('uploaded_file', filename=initial)}}" />
+  <figcaption> Initial upload </figcaption>
+</figure>
+<figure>
+  <img src="{{url_for('uploaded_file', filename=pred)}}" />
+  <figcaption> Prediction </figcaption>
+</figure>
+  <br><br>
+  <form action="/">
+    <input type="submit" value="Try again!" />
+</form>
+</center>
+  </body>
+
+</html>

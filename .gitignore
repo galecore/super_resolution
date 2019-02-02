@@ -4,3 +4,4 @@ data/
 other/init.txt
 faces/
 *__pycache__/
+server/uploads/

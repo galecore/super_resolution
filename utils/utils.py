@@ -36,6 +36,12 @@ def read_data(path):
     normalized = normalize_image_tensor(tensor)
     return normalized
 
+def process_image(path, model):
+    prediction = model.predict(to_batch(read_data(path)))
+    prediction_image = normalized_tensor_to_image(prediction).squeeze()
+    print(prediction_image.shape)
+    imageio.imwrite(path + "sr.jpg", prediction_image)
+    return path.split("/")[-1], path.split("/")[-1] + "sr.jpg"
 
-
+    
     
