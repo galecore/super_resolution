@@ -12,10 +12,11 @@ from flask import send_from_directory
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-device = "cpu"
 
-def load_net(device=device):
-    net = Baseline(device,
+app.config['NETWORK'] = load_net()
+
+def load_net():
+    net = Baseline(
               ConvBlock(3, 64, 7),
     #           ConvBlock(32, 64, 7),
     #           ConvBlock(64, 128, 7),
@@ -41,7 +42,7 @@ def hello():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-        transformed_filename, pred_filename = utils.process_image(filepath, load_net())
+        transformed_filename, pred_filename = utils.process_image(filepath, app.config['NETWORK'])
 
         return render_template('prediction.html', initial=transformed_filename, pred=pred_filename)
     return render_template('index.html')
