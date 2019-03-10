@@ -34,7 +34,7 @@ class RandomPatchFromFolder(data_utils.Dataset):
 
     @staticmethod
     def to_tensor(patch):
-        return torch.Tensor(np.asarray(patch).swapaxes(0, 2)).float() / 255 - 0.5
+        return 2 * (torch.Tensor(np.asarray(patch).swapaxes(0, 2)).float() / 255 - 0.5)
 
     @staticmethod
     def to_image(tensor):
@@ -48,7 +48,7 @@ class RandomPatchFromFolder(data_utils.Dataset):
         else:
             raise Exception("Predictions have shape not in set {3,4}")
 
-        tensor = (tensor + 0.5) * 255
+        tensor = (tensor / 2 + 0.5) * 255
         tensor[tensor > 255] = 255
         tensor[tensor < 0] = 0
         return tensor.round().astype(int)

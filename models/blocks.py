@@ -23,14 +23,17 @@ class ConvBlock(torch.nn.Module):
         torch.nn.init.orthogonal_(self.conv.weight, torch.nn.init.calculate_gain('leaky_relu'))
 
     def forward(self, x):
-        out = self.activation(self.batch_norm(self.conv(x)))
+#         print(x)
+        out = self.conv(x)
+        out = self.batch_norm(out)
+        out = self.activation(out)
         return out
     
     
 class ResidualBlock(torch.nn.Module):
     def __init__(self, in_layers, out_layers, kernel_size=7, activation=torch.nn.ELU):
         super(ResidualBlock, self).__init__()
-        self.conv = ConvBlock(in_layers, out_layers, kernel_size, activation)
+        self.conv = ConvBlock(in_layers, out_layers, kernel_size, activation=activation)
         
     def forward(self, x):
         out = x + self.conv(x)
@@ -59,20 +62,15 @@ class Generator(torch.nn.Module):
 
         self.pre_conv = ConvBlock(3, 64, 9)
 
-        for i in range(self.n_residuals):
-            self.add_module('residual_block_' + str(i+1), ResidualBlock(64, 64, 3))
+        self.residual_seq = torch.nn.Sequential(*[ResidualBlock(64, 64, 3) for i in range(n_residuals)])
 
         self.upconv = UpConvBlock(64, 64, 5)
-        self.post_conv = ConvBlock(64, 3, 5)
+        self.post_conv = ConvBlock(64, 3, 5, activation=torch.nn.Tanh)
 
     def forward(self, x):
         out = self.pre_conv(x)
-
-        residual = out.clone()
-        for i in range(self.n_residuals):
-            residual = self.__getattr__('residual_block_{}'.format(str(i+1)))(residual)
-
-        out = self.upconv(residual)
+        out = self.residual_seq(out)
+        out = self.upconv(out)
         out = self.post_conv(out)
         return out
     
@@ -96,11 +94,9 @@ class Discriminator(torch.nn.Module):
         
     def forward(self, x):
         out = self.pre_conv(x)
-
         out = self.deepen_conv1(self.stride_conv1(out))
         out = self.deepen_conv2(self.stride_conv2(out))
         out = self.deepen_conv3(self.stride_conv3(out))
         out = self.deepen_conv4(self.stride_conv4(out))
-
-        out = F.sigmoid(F.avg_pool3d(out, out.size()))
-        return out
+        out = torch.sigmoid(F.avg_pool3d(out, out.size()[1:]))
+        return out.view(-1)
